@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">نرخ لحظه‌ای</string>
+    <string name="refresh">بروزرسانی</string>
+    <string name="widget_desc">قیمت دلار، یورو، تتر، طلا و سکه</string>
+    <string name="note">قیمت‌ها به تومان · انس به دلار · منبع: tgju.org</string>
+</resources>
