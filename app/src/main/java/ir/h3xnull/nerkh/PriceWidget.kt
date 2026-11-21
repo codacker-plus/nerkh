@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 
 class PriceWidget : AppWidgetProvider() {
@@ -39,6 +40,8 @@ class PriceWidget : AppWidgetProvider() {
     companion object {
         const val ACTION_REFRESH = "ir.h3xnull.nerkh.REFRESH"
 
+        private val ICON = intArrayOf(R.id.i1, R.id.i2, R.id.i3, R.id.i4, R.id.i5, R.id.i6)
+        private val UNIT = intArrayOf(R.id.u1, R.id.u2, R.id.u3, R.id.u4, R.id.u5, R.id.u6)
         private val NAME = intArrayOf(R.id.n1, R.id.n2, R.id.n3, R.id.n4, R.id.n5, R.id.n6)
         private val PRICE = intArrayOf(R.id.p1, R.id.p2, R.id.p3, R.id.p4, R.id.p5, R.id.p6)
         private val CHANGE = intArrayOf(R.id.c1, R.id.c2, R.id.c3, R.id.c4, R.id.c5, R.id.c6)
@@ -71,10 +74,18 @@ class PriceWidget : AppWidgetProvider() {
                 val v = RemoteViews(ctx.packageName, R.layout.widget)
                 PriceRepo.WIDGET_ITEMS.forEachIndexed { i, item ->
                     val q = quotes[i]
+                    v.setImageViewResource(ICON[i], item.icon)
                     v.setTextViewText(NAME[i], item.title)
+                    v.setTextViewText(UNIT[i], PriceRepo.unitText(item))
                     v.setTextViewText(PRICE[i], if (q != null) PriceRepo.priceText(q) else "—")
-                    v.setTextViewText(CHANGE[i], if (q != null) PriceRepo.changeText(q) else "")
-                    v.setTextColor(CHANGE[i], if (q != null) PriceRepo.changeColor(q) else PriceRepo.NEUTRAL)
+                    if (q != null) {
+                        v.setViewVisibility(CHANGE[i], View.VISIBLE)
+                        v.setTextViewText(CHANGE[i], PriceRepo.changeText(q))
+                        v.setTextColor(CHANGE[i], PriceRepo.changeColor(q))
+                        v.setInt(CHANGE[i], "setBackgroundResource", PriceRepo.badgeRes(q))
+                    } else {
+                        v.setViewVisibility(CHANGE[i], View.GONE)
+                    }
                 }
                 v.setTextViewText(R.id.status, status)
                 v.setOnClickPendingIntent(R.id.refresh, refreshPi)

@@ -13,7 +13,7 @@ import java.util.Locale
 import kotlin.math.abs
 
 /** One market item. [key] is the symbol in the tgju live feed. [inRial] = price comes in rial (shown in toman). */
-data class Item(val key: String, val title: String, val inRial: Boolean)
+data class Item(val key: String, val title: String, val inRial: Boolean, val icon: Int)
 
 data class Quote(val item: Item, val price: Double, val changePct: Double, val up: Boolean)
 
@@ -21,22 +21,22 @@ object PriceRepo {
 
     // The 6 items on the widget (order = order on screen).
     val WIDGET_ITEMS = listOf(
-        Item("price_dollar_rl", "دلار", true),
-        Item("price_eur", "یورو", true),
-        Item("crypto-tether-irr", "تتر", true),
-        Item("geram18", "طلای ۱۸ عیار", true),
-        Item("sekee", "سکه امامی", true),
-        Item("ons", "انس طلا", false),
+        Item("price_dollar_rl", "دلار", true, R.drawable.ic_dollar),
+        Item("price_eur", "یورو", true, R.drawable.ic_euro),
+        Item("crypto-tether-irr", "تتر", true, R.drawable.ic_tether),
+        Item("geram18", "طلای ۱۸ عیار", true, R.drawable.ic_gold),
+        Item("sekee", "سکه امامی", true, R.drawable.ic_coin),
+        Item("ons", "انس طلا", false, R.drawable.ic_ounce),
     )
 
     // Everything shown inside the app.
     val ALL_ITEMS = WIDGET_ITEMS + listOf(
-        Item("geram24", "طلای ۲۴ عیار", true),
-        Item("mesghal", "مثقال طلا", true),
-        Item("sekeb", "سکه بهار آزادی", true),
-        Item("nim", "نیم سکه", true),
-        Item("rob", "ربع سکه", true),
-        Item("gerami", "سکه گرمی", true),
+        Item("geram24", "طلای ۲۴ عیار", true, R.drawable.ic_gold),
+        Item("mesghal", "مثقال طلا", true, R.drawable.ic_gold),
+        Item("sekeb", "سکه بهار آزادی", true, R.drawable.ic_coin),
+        Item("nim", "نیم سکه", true, R.drawable.ic_coin),
+        Item("rob", "ربع سکه", true, R.drawable.ic_coin),
+        Item("gerami", "سکه گرمی", true, R.drawable.ic_coin),
     )
 
     val UP = 0xFF22C55E.toInt()
@@ -136,7 +136,7 @@ object PriceRepo {
         val s = if (q.item.inRial) {
             DecimalFormat("#,##0", SYM).format(q.price / 10) // rial -> toman
         } else {
-            DecimalFormat("#,##0.##", SYM).format(q.price) + " $"
+            DecimalFormat("#,##0.##", SYM).format(q.price)
         }
         return fa(s)
     }
@@ -145,6 +145,14 @@ object PriceRepo {
         if (q.changePct == 0.0) return fa("0%")
         val arrow = if (q.up) "▲" else "▼"
         return fa("$arrow " + DecimalFormat("0.##", SYM).format(q.changePct) + "%")
+    }
+
+    fun unitText(item: Item): String = if (item.inRial) "تومان" else "دلار"
+
+    fun badgeRes(q: Quote): Int = when {
+        q.changePct == 0.0 -> R.drawable.pill_flat
+        q.up -> R.drawable.pill_up
+        else -> R.drawable.pill_down
     }
 
     fun changeColor(q: Quote): Int = when {
@@ -162,7 +170,7 @@ object PriceRepo {
 
     fun fetchedAt(ctx: Context): Long = prefs(ctx).getLong(K_TIME, 0L)
 
-    private fun hasError(ctx: Context): Boolean = prefs(ctx).getBoolean(K_ERR, false)
+    fun hasError(ctx: Context): Boolean = prefs(ctx).getBoolean(K_ERR, false)
 
     /** Latin digits/separators -> Persian. */
     fun fa(s: String): String {
